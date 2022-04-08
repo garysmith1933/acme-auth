@@ -28,7 +28,12 @@ User.addHook('beforeSave', async(user) => {
 User.byToken = async(token)=> {
   try {
     const payload = await jwt.verify(token, process.env.JWT)
-    const user = await User.findByPk(payload.id);
+    //we can exclude the password so that its not shown in the console response.
+    const user = await User.findByPk(payload.id, {
+      attributes: {
+        exclude: ['password']
+      }
+    });
     if(user){
       return user;
     }
@@ -49,7 +54,7 @@ User.authenticate = async({ username, password })=> {
       username
     }
   });
-  //the order matters, hashed password, the unhashed password.
+  //the order matters, hashed password, the unhashed pass
   if(user && await bcrypt.compare(password, user.password)){
     return jwt.sign({id: user.id}, process.env.JWT); 
   }
